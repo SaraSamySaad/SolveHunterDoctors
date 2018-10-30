@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/colorAccent"
+    tools:context="com.solvehunterdoctors.solution.hamza.solvehunterdoctors.ProfileActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:background="@color/colorPrimary">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            android:id="@+id/doc_image"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:layout_centerInParent="true"
+            android:src="@drawable/avater"
+            android:layout_gravity="center"
+            app:civ_border_color="@color/colorAccent"
+            app:civ_border_width="3dp" />
+        <TextView
+            android:id="@+id/doc_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="35sp"
+            android:text="doctor name"
+            android:textColor="#fff"
+            android:layout_gravity="center"
+            android:fontFamily="cursive"
+            android:gravity="center" />
+        <TextView
+            android:id="@+id/doctor_medical_specialty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="30sp"
+            android:text="doctor medical specialty"
+            android:textColor="#fff"
+            android:layout_gravity="center"
+            android:fontFamily="cursive"
+            android:gravity="center" />
+        <TextView
+            android:id="@+id/doctor_phone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="25sp"
+            android:text="01283087804"
+            android:textColor="#fff"
+            android:layout_gravity="center"
+            android:fontFamily="cursive"
+            android:gravity="center" />
+        <TextView
+            android:id="@+id/chat_price"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="25sp"
+            android:text="100$"
+            android:textColor="#fff"
+            android:layout_gravity="center"
+            android:fontFamily="cursive"
+            android:gravity="center" />
+
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="3"
+        android:padding="35dp"
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/view_pending_posts"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="View pending posts"
+            android:drawableEnd="@drawable/ic_keyboard_arrow_right_24dp"
+            android:drawablePadding="10dp"
+            android:textColor="#555F68"
+            android:fontFamily="monospace"
+            android:layout_marginBottom="10dp"
+            android:textSize="20sp"/>
+        <TextView
+            android:id="@+id/add_doctor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Add doctor"
+            android:drawablePadding="10dp"
+            android:textColor="#555F68"
+            android:fontFamily="monospace"
+            android:drawableEnd="@drawable/ic_keyboard_arrow_right_24dp"
+            android:layout_marginBottom="10dp"
+            android:textSize="20sp"/>
+        <TextView
+            android:id="@+id/all_doctors"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="All Doctors"
+            android:drawablePadding="10dp"
+            android:textColor="#555F68"
+            android:fontFamily="monospace"
+            android:drawableEnd="@drawable/ic_keyboard_arrow_right_24dp"
+            android:layout_marginBottom="10dp"
+            android:textSize="20sp"/>
+        <TextView
+            android:id="@+id/all_users"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="All users"
+            android:drawablePadding="10dp"
+            android:textColor="#555F68"
+            android:fontFamily="monospace"
+            android:drawableEnd="@drawable/ic_keyboard_arrow_right_24dp"
+            android:layout_marginBottom="10dp"
+            android:textSize="20sp"/>
+
+        <ProgressBar
+            android:id="@+id/user_posts_loader"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:layout_gravity="center"
+            android:indeterminate="true"
+            android:indeterminateTintMode="src_atop"
+            android:indeterminateTint="#ffffff"
+
+            />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/log_out"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/rounded_dark_button"
+        android:text="Log out"
+        android:layout_marginBottom="10dp"
+        android:textAllCaps="false"
+        android:layout_gravity="center_horizontal"
+        android:textColor="#fff"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:textSize="20sp"/>
+
+</LinearLayout>
