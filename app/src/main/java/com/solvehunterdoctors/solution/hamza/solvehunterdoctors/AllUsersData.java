@@ -5,6 +5,15 @@ public class AllUsersData {
     private String image;
     private String name;
     private String phone;
+    private String userId;
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
 
     public void setGender(String gender) {
         this.gender = gender;

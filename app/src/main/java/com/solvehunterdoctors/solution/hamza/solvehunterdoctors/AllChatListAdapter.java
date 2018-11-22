@@ -46,7 +46,11 @@ public class AllChatListAdapter extends RecyclerView.Adapter<AllChatListAdapter.
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 holder.reciverName.setText(String.valueOf(dataSnapshot.child("name").getValue()));
-                Glide.with(mCtx).load(dataSnapshot.child("image").getValue()).into(holder.reciverImage);
+
+                if(!dataSnapshot.child("image").getValue().equals("")){
+                    Glide.with(mCtx).load(dataSnapshot.child("image").getValue()).into(holder.reciverImage);
+                }
+
             }
             @Override
             public void onCancelled(DatabaseError databaseError) {
@@ -54,14 +58,16 @@ public class AllChatListAdapter extends RecyclerView.Adapter<AllChatListAdapter.
             }
         });
         holder.lastMessage.setText(String.valueOf(lastMessage.getLastMessage()));
-//        holder.itemView.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Intent mainIntent = new Intent(mCtx, ChatActivity.class);
-//                mainIntent.putExtra("chatId",dialogesListData.getId());
-//                mCtx.startActivity(mainIntent);
-//            }
-//        });
+
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent mainIntent = new Intent(mCtx, ChattingActivity.class);
+                mainIntent.putExtra("chatId",lastMessage.getId());
+                mainIntent.putExtra("senderId",lastMessage.getReciverId());
+                mCtx.startActivity(mainIntent);
+            }
+        });
     }
 
     @Override

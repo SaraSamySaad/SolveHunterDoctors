@@ -7,6 +7,7 @@ public class AllDoctorsData {
     private String image;
     private String name;
     private String phone;
+    private String docId;
 
     public String getChatPrice() {
         return chatPrice;
@@ -41,6 +42,14 @@ public class AllDoctorsData {
         this.name = name;
         this.phone = phone;
         this.type = type;
+    }
+
+    public void setDocId(String docId) {
+        this.docId = docId;
+    }
+
+    public String getDocId() {
+        return docId;
     }
 
     public AllDoctorsData() {

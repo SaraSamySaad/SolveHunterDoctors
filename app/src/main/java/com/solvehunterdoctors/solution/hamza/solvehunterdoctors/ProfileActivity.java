@@ -4,7 +4,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -27,6 +29,9 @@ public class ProfileActivity extends AppCompatActivity {
     TextView chatPrice;
     ImageView docImage;
     SharedPreferences pref;
+    Button logOut;
+    SharedPreferences.Editor editor;
+    ImageView editProfile;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,6 +45,8 @@ public class ProfileActivity extends AppCompatActivity {
         docPhone=findViewById(R.id.doctor_phone);
         chatPrice=findViewById(R.id.chat_price);
         docImage=findViewById(R.id.doc_image);
+        logOut=findViewById(R.id.log_out);
+        editProfile=findViewById(R.id.edit_profile);
     }
 
     @Override
@@ -50,7 +57,11 @@ public class ProfileActivity extends AppCompatActivity {
         docPhone.setText(pref.getString("phone",""));
         doctorMedicalSpecialty.setText(pref.getString("medicalSpecialty",""));
         chatPrice.setText("chat price :"+pref.getString("chatPrice",""));
-        Glide.with(ProfileActivity.this).load(pref.getString("image","")).into(docImage);
+        if(!pref.getString("image","").equals("")){
+            Glide.with(ProfileActivity.this).load(pref.getString("image","")).into(docImage);
+        }
+
+
     }
 
     @Override
@@ -81,6 +92,28 @@ public class ProfileActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent mainIntent = new Intent(ProfileActivity.this, AllUsersActivity.class);
+                startActivity(mainIntent);
+            }
+        });
+        logOut.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FirebaseAuth.getInstance().signOut();
+                pref = getApplicationContext().getSharedPreferences("myPref", MODE_PRIVATE);
+                editor = pref.edit();
+                editor.remove("userID");
+                editor.apply();
+                Intent i = new Intent(ProfileActivity.this, LoginActivity.class);
+                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(i);
+            }
+        });
+        editProfile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent mainIntent = new Intent(ProfileActivity.this, EditeProfileActivity.class);
+//                mainIntent.putExtra("price",String.valueOf(allDoctorsData.getChatPrice()));
+//                mainIntent.putExtra("docId",allDoctorsData.getId());
                 startActivity(mainIntent);
             }
         });

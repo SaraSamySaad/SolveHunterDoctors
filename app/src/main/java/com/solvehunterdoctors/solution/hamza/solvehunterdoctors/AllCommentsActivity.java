@@ -6,6 +6,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -28,7 +29,7 @@ public class AllCommentsActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     List<CommentData> commentList;
     RecyclerView recyclerView;
-
+    ProgressBar loader;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,11 +42,15 @@ public class AllCommentsActivity extends AppCompatActivity {
         recyclerView = findViewById(R.id.all_comments);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         commentList = new ArrayList<>();
+        loader=findViewById(R.id.loader);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        commentList.clear();
+        loader.setVisibility(View.VISIBLE);
+
         myRef.child("Users").child(getIntent().getExtras().getString("postUploadedId"))
                 .addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -55,7 +60,10 @@ public class AllCommentsActivity extends AppCompatActivity {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             uploadedByName.setText(dataSnapshot.child("name").getValue().toString());
-                            Glide.with(AllCommentsActivity.this).load(dataSnapshot.child("image").getValue()).into(uploadedByImage);
+                            if(!dataSnapshot.child("image").getValue().equals("")){
+                                Glide.with(AllCommentsActivity.this).load(dataSnapshot.child("image").getValue()).into(uploadedByImage);
+                            }
+
                         }
                         @Override
                         public void onCancelled(DatabaseError databaseError) {
@@ -64,8 +72,12 @@ public class AllCommentsActivity extends AppCompatActivity {
                 }
                 else{
                     uploadedByName.setText(dataSnapshot.child("name").getValue().toString());
-                    Glide.with(AllCommentsActivity.this).load(dataSnapshot.child("image").getValue()).into(uploadedByImage);
+                    if(!dataSnapshot.child("image").getValue().equals("")){
+                        Glide.with(AllCommentsActivity.this).load(dataSnapshot.child("image").getValue()).into(uploadedByImage);
+                    }
+
                 }
+                loader.setVisibility(View.GONE);
             }
 
             @Override

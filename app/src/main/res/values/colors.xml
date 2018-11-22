@@ -3,4 +3,6 @@
     <color name="colorPrimary">#58e6eb</color>
     <color name="colorPrimaryDark">#46b8bc</color>
     <color name="colorAccent">#eefcfd</color>
+
+    <color name="alert_dialog_button">#46b8bc</color>
 </resources>

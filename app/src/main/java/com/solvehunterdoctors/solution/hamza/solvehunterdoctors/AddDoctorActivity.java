@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -16,6 +17,8 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
@@ -34,6 +37,7 @@ public class AddDoctorActivity extends AppCompatActivity {
     CheckBox docType;
     private RadioGroup radioSexGroup;
     private FirebaseAuth mAuth;
+    private FirebaseAuth mAuth2;
     ProgressBar adddocProgress;
     FirebaseDatabase database=FirebaseDatabase.getInstance();
     DatabaseReference myRef =database.getReference();
@@ -51,6 +55,20 @@ public class AddDoctorActivity extends AppCompatActivity {
         radioSexGroup = findViewById(R.id.radioSex);
         adddocProgress=findViewById(R.id.add_doc_loader);
         docType =findViewById(R.id.makeAdmin);
+        mAuth2 = FirebaseAuth.getInstance();
+
+
+
+        FirebaseOptions firebaseOptions = new FirebaseOptions.Builder()
+                .setDatabaseUrl("[https://console.firebase.google.com/project/solvehunter/database/solvehunter/data]")
+                .setApiKey("AIzaSyAKZJjr4nju1s0SBnBqvp263nPb3Q2cK8Q")
+                .setApplicationId("solvehunter").build();
+
+        try { FirebaseApp myApp = FirebaseApp.initializeApp(getApplicationContext(), firebaseOptions, "solveHunter");
+            mAuth2 = FirebaseAuth.getInstance(myApp);
+        } catch (IllegalStateException e){
+            mAuth2 = FirebaseAuth.getInstance(FirebaseApp.getInstance("solveHunter"));
+        }
     }
 
     @Override
@@ -58,7 +76,7 @@ public class AddDoctorActivity extends AppCompatActivity {
         super.onResume();
         createDoc.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
+            public void onClick(final View v) {
                 adddocProgress.setVisibility(View.VISIBLE);
                 int selectedId = radioSexGroup.getCheckedRadioButtonId();
                 radioSexButton =  findViewById(selectedId);
@@ -66,10 +84,11 @@ public class AddDoctorActivity extends AppCompatActivity {
                     adddocProgress.setVisibility(View.GONE);
                     Toast.makeText(AddDoctorActivity.this, "Please enter all data", Toast.LENGTH_LONG).show();
                 }
+
                 else {
                     if (docType.isChecked())
                         type="admin";
-                    mAuth.createUserWithEmailAndPassword(docEmail.getText().toString(), "123456").addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                    mAuth2.createUserWithEmailAndPassword(docEmail.getText().toString(), "123456").addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()) {
@@ -78,8 +97,14 @@ public class AddDoctorActivity extends AppCompatActivity {
                                         .addOnCompleteListener(AddDoctorActivity.this, new OnCompleteListener<Void>() {
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
+                                                mAuth2.signOut();
                                                 adddocProgress.setVisibility(View.GONE);
-                                                AlertDialog.Builder builder1 = new AlertDialog.Builder(AddDoctorActivity.this);
+                                                docName.setText("");
+                                                docChatPrice.setText("");
+                                                docPhone.setText("");
+                                                docMedicalSpecialty.setText("");
+                                                docEmail.setText("");
+                                                AlertDialog.Builder builder1 = new AlertDialog.Builder(AddDoctorActivity.this,R.style.AlertDialogDanger);
                                                 builder1.setMessage("Doctor account created with password 123456 ");
                                                 builder1.setPositiveButton(
                                                         "ok",
@@ -90,7 +115,6 @@ public class AddDoctorActivity extends AppCompatActivity {
                                                         });
                                                 AlertDialog alert11 = builder1.create();
                                                 alert11.show();
-                                                alert11.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(getResources().getColor( R.color.colorPrimaryDark));
                                             }
                                         });
                             } else {

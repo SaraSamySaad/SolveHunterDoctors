@@ -50,7 +50,10 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.Comments
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Log.e("sara",commentData.getAddBy().toString());
                 holder.commentedByName.setText(dataSnapshot.child("name").getValue().toString());
-                Glide.with(mCtx).load(dataSnapshot.child("image").getValue()).into(holder.commentedByImage);
+                if(!dataSnapshot.child("image").getValue().equals("")){
+                    Glide.with(mCtx).load(dataSnapshot.child("image").getValue()).into(holder.commentedByImage);
+                }
+
             }
             @Override
             public void onCancelled(DatabaseError databaseError) {

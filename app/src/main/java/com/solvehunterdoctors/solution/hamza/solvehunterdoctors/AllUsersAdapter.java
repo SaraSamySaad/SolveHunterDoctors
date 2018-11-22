@@ -1,6 +1,7 @@
 package com.solvehunterdoctors.solution.hamza.solvehunterdoctors;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -34,7 +35,18 @@ public class AllUsersAdapter extends RecyclerView.Adapter<AllUsersAdapter.AllUse
     public void onBindViewHolder(@NonNull AllUsersAdapterViewHolder holder, int position) {
         final AllUsersData allUsersData = allUsersDataList.get( position);
         holder.docName.setText(allUsersData.getName());
-        Glide.with(mCtx).load(allUsersData.getImage()).into(holder.docImage);
+        if(!allUsersData.getImage().equals("")){
+            Glide.with(mCtx).load(allUsersData.getImage()).into(holder.docImage);
+        }
+
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent mainIntent = new Intent(mCtx, UserDataActivity.class);
+                mainIntent.putExtra("userId",allUsersData.getUserId());
+                mCtx.startActivity(mainIntent);
+            }
+        });
     }
 
     @Override

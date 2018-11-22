@@ -9,6 +9,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -26,6 +27,7 @@ public class AllChatsListTab  extends Fragment {
     DatabaseReference myRef = database.getReference();
     private FirebaseAuth mAuth;
     private List<LastMessage> lastMessagesList;
+    ProgressBar loader;
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -34,14 +36,15 @@ public class AllChatsListTab  extends Fragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         lastMessagesList = new ArrayList<>();
         mAuth = FirebaseAuth.getInstance();
+        loader=view.findViewById(R.id.loader);
         getData();
         return view;
     }
     public void getData(){
-        myRef.child("Doctors").child(mAuth.getCurrentUser().getUid()).child("dialoges").addListenerForSingleValueEvent(new ValueEventListener() {
+        loader.setVisibility(View.VISIBLE);
+        myRef.child("Doctors").child(mAuth.getCurrentUser().getUid()).child("dialoges").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                //loader.setVisibility(View.VISIBLE);
                 lastMessagesList.clear();
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     LastMessage lastMessage = snapshot.getValue(LastMessage.class);
@@ -50,7 +53,7 @@ public class AllChatsListTab  extends Fragment {
                 }
                 AllChatListAdapter adapter=new AllChatListAdapter(getContext(),lastMessagesList);
                 recyclerView.setAdapter(adapter);
-                //loader.setVisibility(View.GONE);
+                loader.setVisibility(View.GONE);
             }
             @Override
             public void onCancelled(DatabaseError databaseError) {

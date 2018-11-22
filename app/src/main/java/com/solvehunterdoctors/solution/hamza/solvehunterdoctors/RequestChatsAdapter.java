@@ -51,7 +51,10 @@ public class RequestChatsAdapter  extends RecyclerView.Adapter<RequestChatsAdapt
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 holder.userName.setText(dataSnapshot.child("name").getValue().toString());
-                Glide.with(mCtx).load(dataSnapshot.child("image").getValue()).into(holder.userImage);
+                if(!dataSnapshot.child("image").getValue().equals("")){
+                    Glide.with(mCtx).load(dataSnapshot.child("image").getValue()).into(holder.userImage);
+                }
+
             }
 
             @Override
@@ -105,6 +108,55 @@ public class RequestChatsAdapter  extends RecyclerView.Adapter<RequestChatsAdapt
                                 });
                     }
                 });
+            }
+        });
+        holder.reject.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                myRef.child("Dialoges").child(mAuth.getCurrentUser().getUid()+requestsChatsData.getUserId()).push()
+                        .setValue(new PushMessage("sorry i can not solve ur problem","false",mAuth.getCurrentUser().getUid()))
+                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                myRef.child("Doctors").child(mAuth.getCurrentUser().getUid()).child("dialoges")
+                                        .child(mAuth.getCurrentUser().getUid()+requestsChatsData.getUserId())
+                                        .setValue(new LastMessage("sorry i can not solve ur problem",requestsChatsData.getUserId()))
+                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                myRef.child("Users").child(requestsChatsData.getUserId()).child("dialoges")
+                                                        .child(mAuth.getCurrentUser().getUid()+requestsChatsData.getUserId())
+                                                        .setValue(new LastMessage("sorry i can not solve ur problem",mAuth.getCurrentUser().getUid()))
+                                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                            @Override
+                                                            public void onComplete(@NonNull Task<Void> task) {
+                                                                myRef.child("ChatRequests").child(mAuth.getCurrentUser().getUid()).child(requestsChatsData.getId())
+                                                                        .removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                    @Override
+                                                                    public void onComplete(@NonNull Task<Void> task) {
+                                                                        AlertDialog.Builder builder1 = new AlertDialog.Builder(mCtx);
+                                                                        builder1.setMessage("this chat is rejected");
+                                                                        builder1.setPositiveButton(
+                                                                                "ok",
+                                                                                new DialogInterface.OnClickListener() {
+                                                                                    public void onClick(DialogInterface dialog, int id) {
+                                                                                        dialog.cancel();
+                                                                                    }
+                                                                                });
+                                                                        AlertDialog alert11 = builder1.create();
+                                                                        alert11.show();
+                                                                        alert11.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(mCtx.getColor( R.color.colorPrimaryDark));
+
+                                                                    }
+                                                                });
+
+                                                            }
+                                                        });
+                                            }
+                                        });
+                            }
+                        });
+
             }
         });
 

@@ -9,6 +9,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -25,6 +26,7 @@ public class AllChatRequestsTab extends Fragment {
     DatabaseReference myRef = database.getReference();
     private FirebaseAuth mAuth;
     RecyclerView recyclerView;
+    ProgressBar loader;
     List<RequestsChatsData> requestsChatsDataList;
     @Nullable
     @Override
@@ -32,13 +34,14 @@ public class AllChatRequestsTab extends Fragment {
         mAuth = FirebaseAuth.getInstance();
         View view = inflater.inflate(R.layout.requests_chats_tab,container,false);
         recyclerView = view.findViewById(R.id.requests);
-        //loader=view.findViewById(R.id.all_doctors_loader);
+        loader=view.findViewById(R.id.loader);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         requestsChatsDataList = new ArrayList<>();
         getData();
         return view;
     }
     public void  getData(){
+        loader.setVisibility(View.VISIBLE);
         myRef.child("ChatRequests").child(mAuth.getCurrentUser().getUid()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -48,6 +51,7 @@ public class AllChatRequestsTab extends Fragment {
                     requestsChatsData.setId(snapshot.getKey());
                     requestsChatsDataList.add(requestsChatsData);
                 }
+                loader.setVisibility(View.GONE);
                 RequestChatsAdapter adapter=new RequestChatsAdapter(getContext(),requestsChatsDataList);
                 recyclerView.setAdapter(adapter);
             }

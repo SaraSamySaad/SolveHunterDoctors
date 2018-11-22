@@ -72,7 +72,9 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.HomeViewHolder
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             holder.userName.setText(dataSnapshot.child("name").getValue().toString());
-                            Glide.with(mCtx).load(dataSnapshot.child("image").getValue()).into(holder.userImage);
+                            if(!dataSnapshot.child("image").getValue().equals("")){
+                                Glide.with(mCtx).load(dataSnapshot.child("image").getValue()).into(holder.userImage);
+                            }
 
                         }
 
@@ -84,7 +86,10 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.HomeViewHolder
                 }
                 else{
                     holder.userName.setText(dataSnapshot.child("name").getValue().toString());
-                    Glide.with(mCtx).load(dataSnapshot.child("image").getValue()).into(holder.userImage);
+                    if(!dataSnapshot.child("image").getValue().equals("")){
+                        Glide.with(mCtx).load(dataSnapshot.child("image").getValue()).into(holder.userImage);
+                    }
+
                 }
 
             }
