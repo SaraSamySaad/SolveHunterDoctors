@@ -46,7 +46,7 @@
         <activity
             android:name=".PendingPostsActivity"
             android:label="pending posts"
-            android:theme="@style/AppTheme.NoActionBar" />
+            />
         <activity
             android:name=".AddDoctorActivity"
             android:label="Add doctor"
@@ -69,9 +69,8 @@
             android:label="Edit profile" />
         <activity
             android:name=".AdminUsersViewActivity"
-            android:theme="@style/AppNoActionBar" />
-        <activity android:name=".UserDataActivity"
-            android:theme="@style/AppNoActionBar"/>
+             />
+        <activity android:name=".UserDataActivity" />
         <activity android:name=".ChangePasswordActivity"></activity>
     </application>
 

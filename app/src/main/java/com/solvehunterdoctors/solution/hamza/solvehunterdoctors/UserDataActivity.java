@@ -3,6 +3,7 @@ package com.solvehunterdoctors.solution.hamza.solvehunterdoctors;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -29,6 +30,20 @@ public class UserDataActivity extends AppCompatActivity {
         docImage=findViewById(R.id.doc_image);
         name=findViewById(R.id.doc_name);
         phone=findViewById(R.id.doctor_phone);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                // API 5+ solution
+                onBackPressed();
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override

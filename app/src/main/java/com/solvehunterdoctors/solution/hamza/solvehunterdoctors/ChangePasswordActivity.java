@@ -4,6 +4,7 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -36,7 +37,20 @@ public class ChangePasswordActivity extends AppCompatActivity {
         loader=findViewById(R.id.loader);
         mAuth=FirebaseAuth.getInstance();
 
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                // API 5+ solution
+                onBackPressed();
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override
@@ -73,7 +87,7 @@ public class ChangePasswordActivity extends AppCompatActivity {
                                         });
                                     } else {
                                         loader.setVisibility(View.GONE);
-                                        Toast.makeText(ChangePasswordActivity.this,"Error auth failed",Toast.LENGTH_LONG)
+                                        Toast.makeText(ChangePasswordActivity.this,"old password wrong",Toast.LENGTH_LONG)
                                                 .show();
                                     }
                                 }

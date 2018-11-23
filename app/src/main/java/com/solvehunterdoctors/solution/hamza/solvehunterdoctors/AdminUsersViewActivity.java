@@ -2,6 +2,7 @@ package com.solvehunterdoctors.solution.hamza.solvehunterdoctors;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -29,6 +30,20 @@ public class AdminUsersViewActivity extends AppCompatActivity {
         name=findViewById(R.id.doc_name);
         phone=findViewById(R.id.doctor_phone);
         price=findViewById(R.id.chat_price);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                // API 5+ solution
+                onBackPressed();
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
     @Override
     protected void onStart() {
