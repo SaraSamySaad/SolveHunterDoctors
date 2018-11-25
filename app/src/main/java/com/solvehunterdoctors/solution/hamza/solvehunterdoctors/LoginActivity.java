@@ -65,14 +65,26 @@ public class LoginActivity extends AppCompatActivity {
                                         myRef.child("Doctors").child(mAuth.getCurrentUser().getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
                                             @Override
                                             public void onDataChange(DataSnapshot dataSnapshot) {
-                                                editor.putString("userID",mAuth.getCurrentUser().getUid());
-                                                editor.putString("name",dataSnapshot.child("name").getValue().toString());
-                                                editor.putString("type",dataSnapshot.child("type").getValue().toString());
-                                                editor.putString("medicalSpecialty",dataSnapshot.child("medicalSpecialty").getValue().toString());
-                                                editor.putString("phone",dataSnapshot.child("phone").getValue().toString());
-                                                editor.putString("chatPrice",dataSnapshot.child("chatPrice").getValue().toString());
-                                                editor.putString("image",dataSnapshot.child("image").getValue().toString());
-                                                editor.commit();
+                                                if (dataSnapshot.getValue()!=null){
+                                                    editor.putString("userID",mAuth.getCurrentUser().getUid());
+                                                    editor.putString("name",dataSnapshot.child("name").getValue().toString());
+                                                    editor.putString("type",dataSnapshot.child("type").getValue().toString());
+                                                    editor.putString("medicalSpecialty",dataSnapshot.child("medicalSpecialty").getValue().toString());
+                                                    editor.putString("phone",dataSnapshot.child("phone").getValue().toString());
+                                                    editor.putString("chatPrice",dataSnapshot.child("chatPrice").getValue().toString());
+                                                    editor.putString("image",dataSnapshot.child("image").getValue().toString());
+                                                    editor.commit();
+                                                    signInProgress.setVisibility(View.GONE);
+                                                    Intent intent = new Intent(LoginActivity.this,HomeActivity.class);
+                                                    startActivity(intent);
+                                                }
+                                                else{
+                                                    FirebaseAuth.getInstance().signOut();
+                                                    signInProgress.setVisibility(View.GONE);
+                                                    Toast.makeText(LoginActivity.this, "please use a doctor email", Toast.LENGTH_SHORT).show();
+                                                }
+
+
                                             }
 
                                             @Override
@@ -81,9 +93,7 @@ public class LoginActivity extends AppCompatActivity {
                                             }
                                         });
 
-                                        signInProgress.setVisibility(View.GONE);
-                                        Intent intent = new Intent(LoginActivity.this,HomeActivity.class);
-                                        startActivity(intent);
+
                                     }
                                     else{
                                         signInProgress.setVisibility(View.GONE);
