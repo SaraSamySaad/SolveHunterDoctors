@@ -3,7 +3,6 @@ package com.solvehunterdoctors.solution.hamza.solvehunterdoctors;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
-import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.graphics.drawable.DrawableCompat;
@@ -19,7 +18,12 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.androidnetworking.AndroidNetworking;
+import com.androidnetworking.common.Priority;
+import com.androidnetworking.error.ANError;
+import com.androidnetworking.interfaces.JSONObjectRequestListener;
 import com.bumptech.glide.Glide;
+import com.facebook.stetho.okhttp3.StethoInterceptor;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -29,18 +33,28 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.List;
+
+import okhttp3.OkHttpClient;
 
 /**
  * Created by C.M on 24/10/2018.
  */
 
-public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.HomeViewHolder>  {
+public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.HomeViewHolder> {
     private Context mCtx;
     private List<PostsData> PostsList;
     FirebaseDatabase database = FirebaseDatabase.getInstance();
     DatabaseReference myRef = database.getReference();
     private FirebaseAuth mAuth;
+
+    JSONObject message;
+    JSONObject messageInfo;
+
+    private final String PUSH_URL = "https://fcm.googleapis.com/fcm/send";
 
     public HomeAdapter(Context mCtx, List<PostsData> postsList) {
         this.mCtx = mCtx;
@@ -59,7 +73,7 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.HomeViewHolder
     public void onBindViewHolder(@NonNull final HomeViewHolder holder, int position) {
 
         mAuth = FirebaseAuth.getInstance();
-        final PostsData postsData = PostsList.get(PostsList.size()-1- position);
+        final PostsData postsData = PostsList.get(PostsList.size() - 1 - position);
         holder.body.setText(postsData.getBody());
         holder.likes.setText(String.valueOf(postsData.getLikes()));
         holder.comments.setText("comments (" + postsData.getComments() + ")");
@@ -67,12 +81,12 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.HomeViewHolder
         myRef.child("Users").child(postsData.getUploadedById()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.getValue()==null){
+                if (dataSnapshot.getValue() == null) {
                     myRef.child("Doctors").child(postsData.getUploadedById()).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             holder.userName.setText(dataSnapshot.child("name").getValue().toString());
-                            if(!dataSnapshot.child("image").getValue().equals("")){
+                            if (!dataSnapshot.child("image").getValue().equals("")) {
                                 Glide.with(mCtx).load(dataSnapshot.child("image").getValue()).into(holder.userImage);
                             }
 
@@ -83,10 +97,9 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.HomeViewHolder
 
                         }
                     });
-                }
-                else{
+                } else {
                     holder.userName.setText(dataSnapshot.child("name").getValue().toString());
-                    if(!dataSnapshot.child("image").getValue().equals("")){
+                    if (!dataSnapshot.child("image").getValue().equals("")) {
                         Glide.with(mCtx).load(dataSnapshot.child("image").getValue()).into(holder.userImage);
                     }
 
@@ -102,15 +115,13 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.HomeViewHolder
         myRef.child("Likes").child(postsData.getId()).child(mAuth.getCurrentUser().getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if(dataSnapshot.getValue()==null){
+                if (dataSnapshot.getValue() == null) {
                     for (Drawable drawable : holder.likes.getCompoundDrawables()) {
                         if (drawable != null) {
                             DrawableCompat.setTint(drawable, ContextCompat.getColor(mCtx, R.color.colorAccent));
                         }
                     }
-                }
-                else
-                {
+                } else {
                     for (Drawable drawable : holder.likes.getCompoundDrawables()) {
                         if (drawable != null) {
                             DrawableCompat.setTint(drawable, ContextCompat.getColor(mCtx, R.color.colorPrimaryDark));
@@ -127,23 +138,82 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.HomeViewHolder
         holder.likes.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.e("likesError",String.valueOf(postsData.getLikes()));
+                Log.e("likesError", String.valueOf(postsData.getLikes()));
                 myRef.child("Likes").child(postsData.getId()).child(mAuth.getCurrentUser().getUid())
                         .addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
-                                if (dataSnapshot.getValue()==null){
+                                if (dataSnapshot.getValue() == null) {
                                     //add user id in fire base like & likes++
                                     myRef.child("Likes").child(postsData.getId()).child(mAuth.getCurrentUser().getUid()).setValue("true")
                                             .addOnCompleteListener(new OnCompleteListener<Void>() {
                                                 @Override
                                                 public void onComplete(@NonNull Task<Void> task) {
-                                                    myRef.child("acceptedPosts").child(postsData.getId()).child("likes").setValue(postsData.getLikes()+1)
+                                                    myRef.child("acceptedPosts").child(postsData.getId()).child("likes").setValue(postsData.getLikes() + 1)
                                                             .addOnCompleteListener(new OnCompleteListener<Void>() {
                                                                 @Override
                                                                 public void onComplete(@NonNull Task<Void> task) {
-                                                                    postsData.setLikes(postsData.getLikes()+1);
+                                                                    postsData.setLikes(postsData.getLikes() + 1);
                                                                     holder.likes.setText(String.valueOf(postsData.getLikes()));
+
+                                                                    myRef.child("PushTokens/" + postsData.getUploadedById()).addListenerForSingleValueEvent(new ValueEventListener() {
+                                                                        @Override
+                                                                        public void onDataChange(DataSnapshot dataSnapshot) {
+                                                                            String userToken = (String) dataSnapshot.getValue();
+
+                                                                            message = new JSONObject();
+                                                                            messageInfo = new JSONObject();
+
+                                                                            try {
+                                                                                messageInfo.put("title", "New Like");
+                                                                                messageInfo.put("message", "Your Post have new like");
+                                                                                //messageInfo.put("image-url", "https://lh3.googleusercontent.com/JrGwExTVGhm24PWMa6mjFFPXMmE1n-LnBtRC1_jtV_gmKiVrt9hVYPoZQPC9e66FBA=h900");
+                                                                            } catch (JSONException e) {
+                                                                                e.printStackTrace();
+                                                                            }
+
+                                                                            try {
+                                                                                message.put("to", userToken);
+                                                                                message.put("data", messageInfo);
+                                                                            } catch (JSONException e) {
+                                                                                e.printStackTrace();
+                                                                            }
+
+
+                                                                            AndroidNetworking.initialize(holder.itemView.getContext());
+
+                                                                            OkHttpClient okHttpClient = new OkHttpClient().newBuilder()
+                                                                                    .addNetworkInterceptor(new StethoInterceptor()).build();
+
+                                                                            AndroidNetworking.initialize(holder.itemView.getContext(), okHttpClient);
+
+
+                                                                            AndroidNetworking.post(PUSH_URL)
+                                                                                    .addJSONObjectBody(message)
+                                                                                    .addHeaders("Authorization", "key=AAAAsEXz4wA:APA91bHV_ac2eQUUdokYPWhDEQSCx0D42J_uHxrH5MaZM3_86NNs0-GrPnXdtwAnst0D4sgrrMinVK5KzgdstdYilPOUNksxcX0KgngB49yf7bz7Y347g1lcEiNscpRhRCIHqZx8yQNc")
+                                                                                    .addHeaders("Content-Type", "application/json")
+                                                                                    .setPriority(Priority.MEDIUM)
+                                                                                    .build()
+                                                                                    .getAsJSONObject(new JSONObjectRequestListener() {
+                                                                                        @Override
+                                                                                        public void onResponse(JSONObject response) {
+
+                                                                                        }
+
+                                                                                        @Override
+                                                                                        public void onError(ANError anError) {
+                                                                                        }
+                                                                                    });
+
+
+                                                                        }
+
+                                                                        @Override
+                                                                        public void onCancelled(DatabaseError databaseError) {
+
+                                                                        }
+                                                                    });
+
                                                                     for (Drawable drawable : holder.likes.getCompoundDrawables()) {
                                                                         if (drawable != null) {
                                                                             DrawableCompat.setTint(drawable, ContextCompat.getColor(mCtx, R.color.colorPrimaryDark));
@@ -160,11 +230,11 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.HomeViewHolder
                                             .removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
                                         @Override
                                         public void onComplete(@NonNull Task<Void> task) {
-                                            myRef.child("acceptedPosts").child(postsData.getId()).child("likes").setValue(postsData.getLikes()-1)
+                                            myRef.child("acceptedPosts").child(postsData.getId()).child("likes").setValue(postsData.getLikes() - 1)
                                                     .addOnCompleteListener(new OnCompleteListener<Void>() {
                                                         @Override
                                                         public void onComplete(@NonNull Task<Void> task) {
-                                                            postsData.setLikes(postsData.getLikes()-1);
+                                                            postsData.setLikes(postsData.getLikes() - 1);
                                                             holder.likes.setText(String.valueOf(postsData.getLikes()));
                                                             for (Drawable drawable : holder.likes.getCompoundDrawables()) {
                                                                 if (drawable != null) {
@@ -191,9 +261,9 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.HomeViewHolder
             @Override
             public void onClick(View v) {
                 Intent mainIntent = new Intent(mCtx, AllCommentsActivity.class);
-                mainIntent.putExtra("postBody",postsData.getBody());
-                mainIntent.putExtra("postUploadedId",postsData.getUploadedById());
-                mainIntent.putExtra("postId",postsData.getId());
+                mainIntent.putExtra("postBody", postsData.getBody());
+                mainIntent.putExtra("postUploadedId", postsData.getUploadedById());
+                mainIntent.putExtra("postId", postsData.getId());
                 mCtx.startActivity(mainIntent);
 
             }
@@ -202,18 +272,78 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.HomeViewHolder
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    myRef.child("Comments").child(postsData.getId()).push().setValue(new CommentData( holder.addComment.getText().toString(),mAuth.getCurrentUser().getUid()))
+                    myRef.child("Comments").child(postsData.getId()).push().setValue(new CommentData(holder.addComment.getText().toString(), mAuth.getCurrentUser().getUid()))
                             .addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
+                                    final String comment = holder.addComment.getText().toString();
                                     holder.addComment.setText("");
 
-                                    myRef.child("acceptedPosts").child(postsData.getId()).child("comments").setValue(postsData.getComments()+1)
+                                    myRef.child("acceptedPosts").child(postsData.getId()).child("comments").setValue(postsData.getComments() + 1)
                                             .addOnCompleteListener(new OnCompleteListener<Void>() {
                                                 @Override
                                                 public void onComplete(@NonNull Task<Void> task) {
-                                                    postsData.setComments(postsData.getComments()+1);
+                                                    postsData.setComments(postsData.getComments() + 1);
                                                     holder.comments.setText(String.valueOf(postsData.getComments()));
+
+                                                    myRef.child("PushTokens/" + postsData.getUploadedById()).addListenerForSingleValueEvent(new ValueEventListener() {
+                                                        @Override
+                                                        public void onDataChange(DataSnapshot dataSnapshot) {
+                                                            String userToken = (String) dataSnapshot.getValue();
+
+                                                            message = new JSONObject();
+                                                            messageInfo = new JSONObject();
+
+                                                            try {
+                                                                messageInfo.put("title", "New Comment");
+                                                                messageInfo.put("message", comment);
+                                                                //messageInfo.put("image-url", "https://lh3.googleusercontent.com/JrGwExTVGhm24PWMa6mjFFPXMmE1n-LnBtRC1_jtV_gmKiVrt9hVYPoZQPC9e66FBA=h900");
+                                                            } catch (JSONException e) {
+                                                                e.printStackTrace();
+                                                            }
+
+                                                            try {
+                                                                message.put("to", userToken);
+                                                                message.put("data", messageInfo);
+                                                            } catch (JSONException e) {
+                                                                e.printStackTrace();
+                                                            }
+
+
+                                                            AndroidNetworking.initialize(holder.itemView.getContext());
+
+                                                            OkHttpClient okHttpClient = new OkHttpClient().newBuilder()
+                                                                    .addNetworkInterceptor(new StethoInterceptor()).build();
+
+                                                            AndroidNetworking.initialize(holder.itemView.getContext(), okHttpClient);
+
+
+                                                            AndroidNetworking.post(PUSH_URL)
+                                                                    .addJSONObjectBody(message)
+                                                                    .addHeaders("Authorization", "key=AAAAsEXz4wA:APA91bHV_ac2eQUUdokYPWhDEQSCx0D42J_uHxrH5MaZM3_86NNs0-GrPnXdtwAnst0D4sgrrMinVK5KzgdstdYilPOUNksxcX0KgngB49yf7bz7Y347g1lcEiNscpRhRCIHqZx8yQNc")
+                                                                    .addHeaders("Content-Type", "application/json")
+                                                                    .setPriority(Priority.MEDIUM)
+                                                                    .build()
+                                                                    .getAsJSONObject(new JSONObjectRequestListener() {
+                                                                        @Override
+                                                                        public void onResponse(JSONObject response) {
+
+                                                                        }
+
+                                                                        @Override
+                                                                        public void onError(ANError anError) {
+                                                                        }
+                                                                    });
+
+
+                                                        }
+
+                                                        @Override
+                                                        public void onCancelled(DatabaseError databaseError) {
+
+                                                        }
+                                                    });
+
                                                 }
                                             });
                                 }
@@ -248,7 +378,7 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.HomeViewHolder
             comments = itemView.findViewById(R.id.comments);
             userName = itemView.findViewById(R.id.user_name);
             userImage = itemView.findViewById(R.id.user_image);
-            addComment=itemView.findViewById(R.id.add_comment);
+            addComment = itemView.findViewById(R.id.add_comment);
         }
     }
 }

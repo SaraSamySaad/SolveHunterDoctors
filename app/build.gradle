@@ -35,6 +35,14 @@ dependencies {
     implementation 'com.github.bumptech.glide:glide:4.6.1'
     implementation 'com.google.firebase:firebase-storage:11.0.4'
 
+    //Fast Networking and okHttp
+    compile 'com.amitshekhar.android:android-networking:1.0.1'
+    compile 'com.amitshekhar.android:jackson-android-networking:1.0.1'
+    compile 'com.squareup.okhttp3:okhttp:+'
+    compile 'com.facebook.stetho:stetho:+'
+    compile 'com.facebook.stetho:stetho-okhttp3:+'
+    implementation "com.google.firebase:firebase-messaging:11.0.4"
+
 }
 
 apply plugin: 'com.google.gms.google-services'

@@ -2,9 +2,10 @@ package com.solvehunterdoctors.solution.hamza.solvehunterdoctors;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.KeyEvent;
@@ -16,7 +17,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -26,6 +26,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +40,9 @@ public class HomeActivity extends AppCompatActivity {
     EditText homePost;
     private FirebaseAuth mAuth;
     SharedPreferences pref;
+    public static boolean isAppRunning;
+    String token;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,9 +52,24 @@ public class HomeActivity extends AppCompatActivity {
 //        recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, true));
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         PostsList = new ArrayList<>();
-        postsLoader=findViewById(R.id.suser_home_loader);
-        homePost=findViewById(R.id.home_post);
+        postsLoader = findViewById(R.id.suser_home_loader);
+        homePost = findViewById(R.id.home_post);
+
+
+        isAppRunning = true;
+
+        token = FirebaseInstanceId.getInstance().getToken();
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mAuth = FirebaseAuth.getInstance();
+                database = FirebaseDatabase.getInstance();
+                myRef.child("PushTokens").child(mAuth.getCurrentUser().getUid()).setValue(token);
+            }
+        }, 2000);
+
     }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -63,7 +82,7 @@ public class HomeActivity extends AppCompatActivity {
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
                     postsLoader.setVisibility(View.VISIBLE);
-                    myRef.child("acceptedPosts").push().setValue(new PostsData(homePost.getText().toString(),0,0,mAuth.getCurrentUser().getUid()))
+                    myRef.child("acceptedPosts").push().setValue(new PostsData(homePost.getText().toString(), 0, 0, mAuth.getCurrentUser().getUid()))
                             .addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
@@ -80,7 +99,8 @@ public class HomeActivity extends AppCompatActivity {
         });
 
     }
-    public void getData(){
+
+    public void getData() {
         myRef.child("acceptedPosts").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -91,9 +111,10 @@ public class HomeActivity extends AppCompatActivity {
                     PostsList.add(postsData);
                     postsLoader.setVisibility(View.GONE);
                 }
-                HomeAdapter adapter=new HomeAdapter(HomeActivity.this,PostsList);
+                HomeAdapter adapter = new HomeAdapter(HomeActivity.this, PostsList);
                 recyclerView.setAdapter(adapter);
             }
+
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
@@ -107,6 +128,7 @@ public class HomeActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.menu, menu);
         return true;
     }
+
     //and this to handle actions
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -115,21 +137,26 @@ public class HomeActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.chat) {
-            Intent mainIntent = new Intent(HomeActivity.this,ChatActivity.class);
+            Intent mainIntent = new Intent(HomeActivity.this, ChatActivity.class);
             HomeActivity.this.startActivity(mainIntent);
         }
         if (id == R.id.profile) {
             pref = getApplicationContext().getSharedPreferences("myPref", MODE_PRIVATE);
-            if (pref.getString("type","null").equals("admin")){
-                Intent mainIntent = new Intent(HomeActivity.this,ProfileActivity.class);
+            if (pref.getString("type", "null").equals("admin")) {
+                Intent mainIntent = new Intent(HomeActivity.this, ProfileActivity.class);
                 HomeActivity.this.startActivity(mainIntent);
-            }
-            else{
-                Intent mainIntent = new Intent(HomeActivity.this,DocProfileActivity.class);
+            } else {
+                Intent mainIntent = new Intent(HomeActivity.this, DocProfileActivity.class);
                 HomeActivity.this.startActivity(mainIntent);
             }
 
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        isAppRunning = false;
     }
 }

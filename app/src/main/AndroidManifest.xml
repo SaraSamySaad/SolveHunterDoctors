@@ -45,8 +45,7 @@
             android:label="Comments" />
         <activity
             android:name=".PendingPostsActivity"
-            android:label="pending posts"
-            />
+            android:label="pending posts" />
         <activity
             android:name=".AddDoctorActivity"
             android:label="Add doctor"
@@ -67,11 +66,26 @@
         <activity
             android:name=".EditeProfileActivity"
             android:label="Edit profile" />
-        <activity
-            android:name=".AdminUsersViewActivity"
-             />
+        <activity android:name=".AdminUsersViewActivity" />
         <activity android:name=".UserDataActivity" />
         <activity android:name=".ChangePasswordActivity"></activity>
+
+
+        <service
+            android:name="com.solvehunterdoctors.solution.hamza.pushnotification.MyFirebaseMessagingService"
+            android:permission="com.google.android.c2dm.permission.SEND">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+            </intent-filter>
+        </service>
+
+        <service android:name="com.solvehunterdoctors.solution.hamza.pushnotification.MyFirebaseInstanceIDService">
+            <intent-filter>
+                <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
+            </intent-filter>
+        </service>
+
     </application>
 
 </manifest>
